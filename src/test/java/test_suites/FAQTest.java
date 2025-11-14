@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import page_objects.HomePage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +16,7 @@ public class FAQTest {
 
     @BeforeEach
     public void setUp() {
-        driver = new ChromeDriver();
+        driver = new FirefoxDriver();
         homePage = new HomePage(driver);
         homePage.open();
         homePage.acceptCookies();

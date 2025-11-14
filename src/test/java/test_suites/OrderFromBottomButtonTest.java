@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import page_objects.HomePage;
 import page_objects.OrderFormPage;
 
@@ -17,7 +17,7 @@ public class OrderFromBottomButtonTest {
 
     @BeforeEach
     public void setUp() {
-        driver = new ChromeDriver();
+        driver = new FirefoxDriver();
         driver.manage().window().maximize();
         homePage = new HomePage(driver);
         orderFormPage = new OrderFormPage(driver);

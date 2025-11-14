@@ -19,7 +19,7 @@ public class HomePage {
     private By orderButtonTop = By.className("Button_Button__ra12g");
 
     // Кнопка "Заказать" в нижней части страницы
-    private By orderButtonBottom = By.xpath("//div[contains(@class, 'Home_FinishButton')]//button");
+    private By orderButtonBottom = By.xpath("//button[contains(@class, 'Button_Middle') and text()='Заказать']");
 
     // Кнопка принятия cookies
     private By cookieButton = By.id("rcc-confirm-button");

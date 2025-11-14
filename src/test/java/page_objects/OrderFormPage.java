@@ -1,6 +1,7 @@
 package page_objects;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -10,6 +11,7 @@ import java.time.Duration;
 
 public class OrderFormPage {
     private WebDriver driver;
+    private WebDriverWait wait;
 
     // Поле ввода имени
     private By nameField = By.xpath("//input[@placeholder='* Имя']");
@@ -45,7 +47,7 @@ public class OrderFormPage {
     private By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
 
     // Кнопка подтверждения заказа на второй странице формы
-    private By orderButton = By.xpath("//button[text()='Заказать']");
+    private By orderButton = By.xpath(".//button[text()='Заказать' and contains(@class, 'Button_Middle')]");
 
     // Кнопка подтверждения заказа во всплывающем окне
     private By confirmOrderButton = By.xpath("//button[text()='Да']");
@@ -55,43 +57,37 @@ public class OrderFormPage {
 
     public OrderFormPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    public void fillCustomerInfo(String name, String surname, String address, String metro, String phone) throws InterruptedException {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    public void fillCustomerInfo(String name, String surname, String address, String metro, String phone) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(nameField));
 
-        wait.until(ExpectedConditions.elementToBeClickable(nameField)).sendKeys(name);
-        wait.until(ExpectedConditions.elementToBeClickable(surnameField)).sendKeys(surname);
-        wait.until(ExpectedConditions.elementToBeClickable(addressField)).sendKeys(address);
+        driver.findElement(nameField).sendKeys(name);
+        driver.findElement(surnameField).sendKeys(surname);
+        driver.findElement(addressField).sendKeys(address);
 
-        WebElement metroElement = wait.until(ExpectedConditions.elementToBeClickable(metroField));
+        WebElement metroElement = driver.findElement(metroField);
         metroElement.click();
-        metroElement.sendKeys(metro);
 
-        Thread.sleep(2000);
-        WebElement metroStation = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//div[contains(text(), '" + metro + "')]")));
-        metroStation.click();
+        By metroStationOption = By.xpath(".//li[@class='select-search__row']//button");
+        wait.until(ExpectedConditions.elementToBeClickable(metroStationOption));
+        driver.findElement(metroStationOption).click();
 
-        wait.until(ExpectedConditions.elementToBeClickable(phoneField)).sendKeys(phone);
-        wait.until(ExpectedConditions.elementToBeClickable(nextButton)).click();
+        driver.findElement(phoneField).sendKeys(phone);
+        driver.findElement(nextButton).click();
     }
 
-    public void fillRentalDetails(String date, String period, String color, String comment) throws InterruptedException {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    public void fillRentalDetails(String date, String period, String color, String comment) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(dateField));
 
-        WebElement dateElement = wait.until(ExpectedConditions.elementToBeClickable(dateField));
+        WebElement dateElement = driver.findElement(dateField);
         dateElement.sendKeys(date);
-
         driver.findElement(By.tagName("body")).click();
-        Thread.sleep(1000);
 
-        WebElement rentalPeriodElement = wait.until(ExpectedConditions.elementToBeClickable(rentalPeriodField));
-        rentalPeriodElement.click();
-
-        WebElement periodOption = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//div[text()='" + period + "']")));
-        periodOption.click();
+        driver.findElement(rentalPeriodField).click();
+        By periodOption = By.xpath(".//div[contains(text(), '" + period + "')]");
+        wait.until(ExpectedConditions.elementToBeClickable(periodOption)).click();
 
         if ("black".equals(color)) {
             driver.findElement(colorBlack).click();
@@ -99,19 +95,24 @@ public class OrderFormPage {
             driver.findElement(colorGrey).click();
         }
 
-        wait.until(ExpectedConditions.elementToBeClickable(commentField)).sendKeys(comment);
-        wait.until(ExpectedConditions.elementToBeClickable(orderButton)).click();
+        if (comment != null && !comment.isEmpty()) {
+            driver.findElement(commentField).sendKeys(comment);
+        }
+
+        WebElement orderButtonElement = wait.until(ExpectedConditions.elementToBeClickable(orderButton));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", orderButtonElement);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", orderButtonElement);
     }
 
     public void confirmOrder() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.elementToBeClickable(confirmOrderButton)).click();
+        WebElement confirmButton = wait.until(ExpectedConditions.elementToBeClickable(confirmOrderButton));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmButton);
     }
 
     public boolean isOrderSuccess() {
         try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(orderSuccessModal)).isDisplayed();
+            WebElement successModal = wait.until(ExpectedConditions.visibilityOfElementLocated(orderSuccessModal));
+            return successModal.isDisplayed();
         } catch (Exception e) {
             return false;
         }
