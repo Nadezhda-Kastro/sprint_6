@@ -3,6 +3,7 @@ package page_objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class HomePage {
     private WebDriver driver;
+    private WebDriverWait wait;
 
     // Заголовок главной страницы
     private By header = By.className("Home_Header__iJKdX");
@@ -34,7 +36,9 @@ public class HomePage {
     private By answerPanels = By.xpath("//div[@data-accordion-component='AccordionItemPanel']");
 
     public HomePage(WebDriver driver) {
+
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     // Открытие главной страницы приложения
@@ -45,7 +49,6 @@ public class HomePage {
     // Принятие cookies для продолжения работы с сайтом
     public void acceptCookies() {
         try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
             WebElement cookie = wait.until(ExpectedConditions.elementToBeClickable(cookieButton));
             cookie.click();
         } catch (Exception e) {
@@ -63,23 +66,13 @@ public class HomePage {
 
     // Нажатие на нижнюю кнопку "Заказать"
     public void clickBottomOrderButton() {
-        List<WebElement> orderButtons = driver.findElements(orderButtonTop);
 
-        if (orderButtons.size() > 1) {
-            // Использование второй кнопки из списка (нижняя)
-            WebElement bottomButton = orderButtons.get(1);
-            scrollToElement(bottomButton);
-            bottomButton.click();
-        } else {
-            try {
-                // Альтернативный поиск нижней кнопки
-                WebElement bottomButton = driver.findElement(orderButtonBottom);
-                scrollToElement(bottomButton);
-                bottomButton.click();
-            } catch (Exception e) {
-                System.out.println("Нижняя кнопка заказа не найдена");
-            }
-        }
+        List<WebElement> orderButtons = driver.findElements(By.xpath("//button[text()='Заказать']"));
+        WebElement bottomButton = orderButtons.get(orderButtons.size() - 1);
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", bottomButton);
+        wait.until(ExpectedConditions.elementToBeClickable(bottomButton));
+        bottomButton.click();
     }
 
     // Раскрытие вопроса по индексу для просмотра ответа
@@ -87,8 +80,13 @@ public class HomePage {
         List<WebElement> questionElements = driver.findElements(questionButtons);
         if (questionIndex < questionElements.size()) {
             WebElement question = questionElements.get(questionIndex);
-            scrollToElement(question);
-            question.click();
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});",
+                    question
+            );
+            wait.until(ExpectedConditions.elementToBeClickable(question));
+
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", question);
         }
     }
 
@@ -119,6 +117,6 @@ public class HomePage {
 
     // Скролл страницы к указанному элементу
     private void scrollToElement(WebElement element) {
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
     }
 }

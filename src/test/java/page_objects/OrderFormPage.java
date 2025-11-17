@@ -55,6 +55,9 @@ public class OrderFormPage {
     // Модальное окно с сообщением об успешном создании заказа
     private By orderSuccessModal = By.xpath("//div[contains(@class, 'Order_Modal')]");
 
+    //private By orderSuccessText = By.xpath(".//div[contains(@class, 'Order_ModalHeader')]");
+
+
     public OrderFormPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -63,19 +66,38 @@ public class OrderFormPage {
     public void fillCustomerInfo(String name, String surname, String address, String metro, String phone) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(nameField));
 
-        driver.findElement(nameField).sendKeys(name);
-        driver.findElement(surnameField).sendKeys(surname);
-        driver.findElement(addressField).sendKeys(address);
+        // заполнение полей
+        WebElement nameElement = wait.until(ExpectedConditions.elementToBeClickable(nameField));
+        nameElement.sendKeys(name);
+        wait.until(ExpectedConditions.attributeToBe(nameField, "value", name));
 
-        WebElement metroElement = driver.findElement(metroField);
+        WebElement surnameElement = wait.until(ExpectedConditions.elementToBeClickable(surnameField));
+        surnameElement.sendKeys(surname);
+        wait.until(ExpectedConditions.attributeToBe(surnameField, "value", surname));
+
+        WebElement addressElement = wait.until(ExpectedConditions.elementToBeClickable(addressField));
+        addressElement.sendKeys(address);
+        wait.until(ExpectedConditions.attributeToBe(addressField, "value", address));
+
+        // Выбор метро
+        WebElement metroElement = wait.until(ExpectedConditions.elementToBeClickable(metroField));
         metroElement.click();
+        metroElement.sendKeys(metro);
 
-        By metroStationOption = By.xpath(".//li[@class='select-search__row']//button");
-        wait.until(ExpectedConditions.elementToBeClickable(metroStationOption));
-        driver.findElement(metroStationOption).click();
+        By metroOption = By.xpath(".//div[text()='" + metro + "']");
+        WebElement metroStation = wait.until(ExpectedConditions.elementToBeClickable(metroOption));
+        wait.until(ExpectedConditions.visibilityOf(metroStation));
+        metroStation.click();
 
-        driver.findElement(phoneField).sendKeys(phone);
-        driver.findElement(nextButton).click();
+        WebElement phoneElement = wait.until(ExpectedConditions.elementToBeClickable(phoneField));
+        phoneElement.sendKeys(phone);
+        wait.until(ExpectedConditions.attributeToBe(phoneField, "value", phone));
+
+        WebElement nextBtn = wait.until(ExpectedConditions.elementToBeClickable(nextButton));
+        nextBtn.click();
+
+        // Ждем загрузки второй страницы
+        wait.until(ExpectedConditions.visibilityOfElementLocated(dateField));
     }
 
     public void fillRentalDetails(String date, String period, String color, String comment) {
@@ -109,11 +131,36 @@ public class OrderFormPage {
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmButton);
     }
 
+    /*public boolean isOrderSuccess() {
+        try {
+            WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(orderSuccessModal));
+
+            wait.until(ExpectedConditions.attributeContains(orderSuccessModal, "class", "Modal_modal_opened"));
+
+            WebElement successTextElement = modal.findElement(By.xpath(".//div[contains(text(), 'Заказ оформлен')]"));
+            return successTextElement.isDisplayed();
+
+        } catch (Exception e) {
+            return false;
+        }
+    } */
+
+    // Используем конкретный класс для текста успеха
+    private By orderSuccessText = By.className("Order_ModalHeader__3FDaJ");
+
     public boolean isOrderSuccess() {
         try {
-            WebElement successModal = wait.until(ExpectedConditions.visibilityOfElementLocated(orderSuccessModal));
-            return successModal.isDisplayed();
+            // Ждем появления элемента с классом Order_ModalHeader__3FDaJ
+            WebElement successElement = wait.until(ExpectedConditions.visibilityOfElementLocated(orderSuccessText));
+            String successText = successElement.getText();
+
+            System.out.println("Текст элемента: " + successText);
+
+            // Проверяем что текст содержит подтверждение заказа
+            return successText.contains("Заказ оформлен");
+
         } catch (Exception e) {
+            System.out.println("Элемент Order_ModalHeader__3FDaJ не найден: " + e.getMessage());
             return false;
         }
     }

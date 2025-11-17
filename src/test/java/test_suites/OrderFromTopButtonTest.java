@@ -41,20 +41,20 @@ public class OrderFromTopButtonTest {
     @MethodSource("orderDataProvider")
     public void completeOrderViaTopButton(String name, String surname, String address, String metro,
                                           String phone, String date, String period, String color,
-                                          String comment) throws InterruptedException {
+                                          String comment) {
+        homePage.clickTopOrderButton();
+        orderFormPage.fillCustomerInfo(name, surname, address, metro, phone);
+        orderFormPage.fillRentalDetails(date, period, color, comment);
+        orderFormPage.confirmOrder();
 
-        try {
-            homePage.clickTopOrderButton();
-            orderFormPage.fillCustomerInfo(name, surname, address, metro, phone);
-            orderFormPage.fillRentalDetails(date, period, color, comment);
-            orderFormPage.confirmOrder();
-            assertTrue(orderFormPage.isOrderSuccess());
-        } catch (Exception e) {
-        }
+        boolean success = orderFormPage.isOrderSuccess();
+        assertTrue(success, "Заказ должен быть успешно оформлен");
     }
 
     @AfterEach
     public void tearDown() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
