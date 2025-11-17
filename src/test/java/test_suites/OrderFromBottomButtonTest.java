@@ -26,30 +26,31 @@ public class OrderFromBottomButtonTest {
     }
 
     @Test
-    public void completeOrderViaBottomButton() throws InterruptedException {
-        try {
-            homePage.clickBottomOrderButton();
-            orderFormPage.fillCustomerInfo(
-                    "Екатерина",
-                    "Кузнецова",
-                    "пр. Вернадского, 105",
-                    "Проспект Вернадского",
-                    "79990001122"
-            );
-            orderFormPage.fillRentalDetails(
-                    "18.12.2025",
-                    "двое суток",
-                    "black",
-                    "Код домофона 125"
-            );
-            orderFormPage.confirmOrder();
-            assertTrue(orderFormPage.isOrderSuccess());
-        } catch (Exception e) {
-        }
+    public void completeOrderViaBottomButton() {
+        homePage.clickBottomOrderButton();
+        orderFormPage.fillCustomerInfo(
+                "Екатерина",
+                "Кузнецова",
+                "пр. Вернадского, 105",
+                "Проспект Вернадского",
+                "79990001122"
+        );
+        orderFormPage.fillRentalDetails(
+                "18.12.2025",
+                "двое суток",
+                "black",
+                "Код домофона 125"
+        );
+        orderFormPage.confirmOrder();
+
+        boolean success = orderFormPage.isOrderSuccess();
+        assertTrue(success, "Заказ должен быть успешно оформлен");
     }
 
     @AfterEach
     public void tearDown() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
